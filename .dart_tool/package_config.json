@@ -3,13 +3,13 @@
   "packages": [
     {
       "name": "_fe_analyzer_shared",
-      "rootUri": "file:///Users/bruno.almeida/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-60.0.0",
+      "rootUri": "file:///Users/bruno.almeida/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-61.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "analyzer",
-      "rootUri": "file:///Users/bruno.almeida/.pub-cache/hosted/pub.dev/analyzer-5.12.0",
+      "rootUri": "file:///Users/bruno.almeida/.pub-cache/hosted/pub.dev/analyzer-5.13.0",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -75,15 +75,15 @@
     },
     {
       "name": "built_value",
-      "rootUri": "file:///Users/bruno.almeida/.pub-cache/hosted/pub.dev/built_value-8.5.0",
+      "rootUri": "file:///Users/bruno.almeida/.pub-cache/hosted/pub.dev/built_value-8.6.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "built_value_generator",
-      "rootUri": "file:///Users/bruno.almeida/.pub-cache/hosted/pub.dev/built_value_generator-8.5.0",
+      "rootUri": "file:///Users/bruno.almeida/.pub-cache/hosted/pub.dev/built_value_generator-8.6.0",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.0"
     },
     {
       "name": "cached_network_image",
@@ -626,7 +626,7 @@
       "languageVersion": "2.19"
     }
   ],
-  "generated": "2023-05-22T20:06:19.145692Z",
+  "generated": "2023-05-22T20:21:41.144542Z",
   "generator": "pub",
   "generatorVersion": "3.0.1"
 }
