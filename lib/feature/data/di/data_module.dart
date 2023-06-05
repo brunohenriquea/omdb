@@ -1,31 +1,22 @@
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
-import 'package:omdb/core/constants/env.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omdb/core/di/app_module.dart';
 import 'package:omdb/core/network/auth_header_interceptor.dart';
 import 'package:omdb/core/network/debug_logger_interceptor.dart';
 import 'package:omdb/feature/data/api_service.dart';
 
+final dioProvider = Provider<Dio>((ref) {
+  final baseUrl = ref.read(baseUrlProvider);
+  final apiKey = ref.read(apiKeyProvider);
+  final baseOptions = BaseOptions();
+  final dio = Dio(baseOptions);
+  baseOptions.baseUrl = baseUrl;
+  dio.interceptors.add(HeaderInterceptor(apiKey));
+  dio.interceptors.add(DebugLoggerInterceptor());
+  return dio;
+});
 
-@module
-abstract class NetworkModule {
-  @LazySingleton()
-  Dio get dio => (String apiKey) {
-    final baseOptions = BaseOptions();
-    final dio = Dio(baseOptions);
-    baseOptions.baseUrl = env.config.apiBaseUrl;
-    dio.interceptors.add(HeaderInterceptor(apiKey));
-    dio.interceptors.add(DebugLoggerInterceptor());
-    return dio;
-      }(apiKey);
-
-  @LazySingleton()
-  APIService get apiService => (Dio dio) {
-        return APIService(dio);
-      }(dio);
-
-  @LazySingleton()
-  @Named("apiKey")
-  String get apiKey => () {
-        return "5053fbe20dmsh3ec833de176001ep18f609jsnfbe7e3fdba9f";
-      }();
-}
+final apiServiceProvider = Provider<APIService>((ref) {
+  final dio = ref.read(dioProvider);
+  return APIService(dio);
+});

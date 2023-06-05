@@ -1,88 +1,131 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import 'package:omdb/core/di/app_module.dart';
-import 'package:omdb/feature/data/api_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omdb/feature/data/model/movie_response.dart';
+import 'package:omdb/feature/presentation/movie_page_state.dart';
+import 'package:omdb/feature/presentation/movie_page_viewmodel.dart';
 
-
-
-class MoviePage extends StatefulWidget {
-  const MoviePage({Key? key}) : super(key: key);
-
-  @override
-  State<MoviePage> createState() => _MoviePageState();
-}
-
-class _MoviePageState extends State<MoviePage> {
-
-  APIService apiService = getIt<APIService>();
+class MoviePage extends ConsumerWidget {
+  const MoviePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final viewState = ref.watch(movieViewStateProvider);
+    final viewModel = ref.read(movieViewModelProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("some text"),
-      ),
-      body: FutureBuilder<MovieResponse>(
-          future: apiService.getMovies("Avengers"),
-          builder: (_, snapshot) {
-            if (snapshot.hasData) {
-              List<MovieResponseData> movies = snapshot.data!.data!;
-              return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  itemCount: movies.length - 1,
-                  itemBuilder: (buildContext, index) {
-                    var movie = movies[index];
-                    return _MovieItem(
-                        url: movie.image?.imageUrl,
-                        title: movie.title!,
-                        type: movie.titleType!,
-                        year: movie.year!);
-                  });
-            } else if (snapshot.hasError) {
-              return const Icon(Icons.error_outline);
-            } else {
-              return Container(
-                alignment: Alignment.center,
-                constraints: const BoxConstraints.expand(),
-                child: const CircularProgressIndicator(),
-              );
-            }
-          }),
-    );
+        appBar: AppBar(
+          title: Text("some text"),
+        ),
+        body: _handleStateOfBody(viewState, viewModel));
   }
 }
 
-class _MovieItem extends StatefulWidget {
+Widget _handleStateOfBody(MoviePageState state, MoviePageViewModel viewModel) {
+  switch (state.runtimeType) {
+    case InitialState:
+      {
+        return _handleInitialState(viewModel);
+      }
+    case OnSuccessMovieRequest:
+      {
+        return _onSuccessMovieRequest(
+            state as OnSuccessMovieRequest, viewModel);
+      }
+    case OnLoading:
+      {
+        return _buildLoading();
+      }
+    default:
+      return Text("Error");
+  }
+}
+
+Widget _handleInitialState(MoviePageViewModel viewModel) {
+  return Center(
+    child: TextButton(
+        onPressed: () {
+          viewModel.getMovies("Avengers");
+        },
+        child: Text("Search Avengers Movies")),
+  );
+}
+
+Widget _onSuccessMovieRequest(
+    OnSuccessMovieRequest state, MoviePageViewModel viewModel) {
+  if (state.movies.isNotEmpty) {
+    return _movieList(state.movies);
+  } else {
+    return Text("Error");
+  }
+}
+
+Widget _buildLoading() {
+  return Center(
+    child: CircularProgressIndicator(),
+  );
+}
+
+ListView _movieList(List<MovieResponseData> movies) => ListView.builder(
+    padding: const EdgeInsets.symmetric(horizontal: 10),
+    itemCount: movies.length - 1,
+    itemBuilder: (buildContext, index) {
+      var movie = movies[index];
+      return _MovieItem(
+          url: movie.image?.imageUrl,
+          title: movie.title!,
+          type: movie.titleType!,
+          year: movie.year!);
+    });
+
+//  FutureBuilder<MovieResponse>(
+//           future: apiService.getMovies("Avengers"),
+//           builder: (_, snapshot) {
+//             if (snapshot.hasData) {
+//               List<MovieResponseData> movies = snapshot.data!.data!;
+//               return ListView.builder(
+//                   padding: const EdgeInsets.symmetric(horizontal: 10),
+//                   itemCount: movies.length - 1,
+//                   itemBuilder: (buildContext, index) {
+//                     var movie = movies[index];
+//                     return _MovieItem(
+//                         url: movie.image?.imageUrl,
+//                         title: movie.title!,
+//                         type: movie.titleType!,
+//                         year: movie.year!);
+//                   });
+//             } else if (snapshot.hasError) {
+//               return const Icon(Icons.error_outline);
+//             } else {
+//               return Container(
+//                 alignment: Alignment.center,
+//                 constraints: const BoxConstraints.expand(),
+//                 child: const CircularProgressIndicator(),
+//               );
+//             }
+//           })
+class _MovieItem extends StatelessWidget {
   String? url;
   String title;
   String type;
   int year;
   bool? isFavorite = false;
 
-  _MovieItem({super.key,
-    this.url,
-    required this.title,
-    required this.type,
-    required this.year,
-    this.isFavorite});
+  _MovieItem(
+      {super.key,
+      this.url,
+      required this.title,
+      required this.type,
+      required this.year,
+      this.isFavorite});
 
-  @override
-  State<_MovieItem> createState() => _MovieItemState();
-}
-
-class _MovieItemState extends State<_MovieItem> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-      {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Title clicked is: ${widget.title}")))
+      onTap: () => {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Title clicked is: $title")))
       },
       child: Card(
         semanticContainer: true,
@@ -95,11 +138,11 @@ class _MovieItemState extends State<_MovieItem> {
             mainAxisAlignment: MainAxisAlignment.start,
             direction: Axis.horizontal,
             children: [
-              _getImageWidget(widget.url),
+              _getImageWidget(url),
               Flexible(
                   flex: 1,
                   fit: FlexFit.tight,
-                  child: _getTextContent(widget.title, widget.type))
+                  child: _getTextContent(title, type))
             ],
           ),
         ),
@@ -108,17 +151,16 @@ class _MovieItemState extends State<_MovieItem> {
   }
 
   _getImageWidget(String? url) {
-    if (widget.url != null) {
+    if (url != null) {
       return CachedNetworkImage(
         fit: BoxFit.fill,
-        imageUrl: widget.url!,
+        imageUrl: url!,
         height: 180,
         width: 120,
         errorWidget: (context, url, error) => Icon(Icons.error),
-        placeholder: (context, url) =>
-            Center(
-                child: SizedBox(
-                    height: 30, width: 30, child: CircularProgressIndicator())),
+        placeholder: (context, url) => Center(
+            child: SizedBox(
+                height: 30, width: 30, child: CircularProgressIndicator())),
       );
     } else {
       return Image.asset(
@@ -135,13 +177,13 @@ class _MovieItemState extends State<_MovieItem> {
         direction: Axis.vertical,
         children: [
           Text(
-            widget.title,
+            title,
             style: TextStyle(
                 color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
             maxLines: 2,
           ),
           Text(
-            widget.type,
+            type,
             style: TextStyle(color: Colors.black54, fontSize: 14),
           ),
           Spacer(
@@ -159,8 +201,8 @@ class _MovieItemState extends State<_MovieItem> {
                 Flexible(
                     flex: 1,
                     child: Icon(
-                          () {
-                        if (widget.isFavorite.orFalse()) {
+                      () {
+                        if (isFavorite.orFalse()) {
                           Icons.favorite;
                         } else {
                           Icons.favorite_border;

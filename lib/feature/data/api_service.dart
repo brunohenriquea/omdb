@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:omdb/core/constants/network.dart';
 import 'package:retrofit/http.dart';
-import 'package:injectable/injectable.dart';
 import 'model/movie_response.dart';
 
 part 'api_service.g.dart';

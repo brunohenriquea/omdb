@@ -3,10 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' as foundation;
-import 'package:injectable/injectable.dart';
-import 'package:omdb/core/di/app_module.dart';
 
-@LazySingleton()
 class Env {
   static const bool IS_RELEASE = foundation.kReleaseMode;
 
@@ -48,5 +45,3 @@ class _EnvData {
     required this.apiBaseUrl,
   });
 }
-
-final Env env = getIt<Env>();

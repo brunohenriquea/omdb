@@ -1,32 +1,14 @@
-import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
+import 'package:omdb/core/constants/env.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'app_module.config.dart';
+final envProvider = Provider<Env>((ref) {
+  return Env();
+});
 
-final GetIt getIt = GetIt.instance;
+final baseUrlProvider = Provider<String>((ref) {
+  return ref.read(envProvider).config.apiBaseUrl;
+});
 
-@InjectableInit(
-  asExtension: true,
-  initializerName: 'init',
-)
-Future<GetIt> getItInit({
-  String? env,
-  EnvironmentFilter? environmentFilter,
-}) async {
-  return getIt.init(
-    environmentFilter: environmentFilter,
-    environment: env,
-  );
-}
-
-void resetGetIt<T extends Object>({
-  T? instance,
-  String? instanceName,
-  void Function(T)? disposingFunction,
-}) {
-  getIt.resetLazySingleton<T>(
-    instance: instance,
-    instanceName: instanceName,
-    disposingFunction: disposingFunction,
-  );
-}
+final apiKeyProvider = Provider<String>((ref) {
+  return "5053fbe20dmsh3ec833de176001ep18f609jsnfbe7e3fdba9f";
+});
